@@ -1,4 +1,4 @@
-import { serverURL } from "./serverUrl";
+import { serverURL } from "./serverURL";
 import { commonAPI } from "./commonAPI";
 
 //register api
