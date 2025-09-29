@@ -2,7 +2,9 @@ import React from "react";
 import { FaBookReader } from "react-icons/fa";
 import { CiLogin } from "react-icons/ci";
 import { IoMdLogOut } from "react-icons/io";
+import { useNavigate } from "react-router-dom";
 function AdminHeader() {
+  const navigate = useNavigate();
   return (
     <div>
       <header className="flex fixed top-0 w-full  justify-between bg-amber-950 h-20 px-4 py-2 shadow-md items-center z-10">
@@ -10,7 +12,13 @@ function AdminHeader() {
           <FaBookReader className="text-4xl mx-3 text-yellow-100" />
           Shelfwise
         </h1>
-        <button className="flex items-center bg-white py-2 px-2 rounded cursor-pointer">
+        <button
+          onClick={() => {
+            sessionStorage.clear();
+            navigate("/");
+          }}
+          className="flex items-center bg-white py-2 px-2 rounded cursor-pointer"
+        >
           <IoMdLogOut />
           Logout
         </button>

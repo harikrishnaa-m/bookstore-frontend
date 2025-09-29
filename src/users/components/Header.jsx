@@ -10,9 +10,10 @@ import {
   NavbarLink,
   NavbarToggle,
 } from "flowbite-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function Header() {
+  const navigate = useNavigate();
   const [token, setToken] = useState("");
   const [userDetails, setUserDetails] = useState({});
 
@@ -53,13 +54,29 @@ function Header() {
               className="relative right-10 outline-none !focus:outline-none rounded"
               dismissOnClick={false}
             >
-              <DropdownItem className="!text-neutral-800">
+              <DropdownItem
+                onClick={() => {
+                  const user = JSON.parse(
+                    sessionStorage.getItem("existingUser")
+                  );
+                  if (user?.username === "admin") {
+                    navigate("/admin-home");
+                  } else {
+                    navigate("/profile");
+                  }
+                }}
+                className="!text-neutral-800"
+              >
                 Dashboard
               </DropdownItem>
-              <DropdownItem className="!text-neutral-800">
-                Settings
-              </DropdownItem>
-              <DropdownItem className="!text-neutral-800">
+
+              <DropdownItem
+                onClick={() => {
+                  sessionStorage.clear();
+                  navigate("/login");
+                }}
+                className="!text-neutral-800"
+              >
                 Sign out
               </DropdownItem>
             </Dropdown>
