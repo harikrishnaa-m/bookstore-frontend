@@ -493,7 +493,7 @@ function AdminCareers() {
                             </td>
                             <td className="border-2 border-gray-400 px-4 py-2 hover:underline hover:text-blue-600 cursor-pointer">
                               <a
-                                href={`/uploads/${applicant.resume}`}
+                                href={`https://bookstore-backend-server.onrender.com/uploads/${applicant.resume}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 download
