@@ -1,2 +1,2 @@
-export const serverURL = "http://localhost:3000";
+export const serverURL = "https://bookstore-backend-server.onrender.com";
 //https://bookstore-backend-2-cz2t.onrender.com
