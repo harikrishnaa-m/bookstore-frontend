@@ -3,7 +3,6 @@ import Header from "../components/Header";
 import Footer from "../../components/Footer";
 import { FiMapPin } from "react-icons/fi";
 import { BsBoxArrowUpRight } from "react-icons/bs";
-
 import {
   Button,
   Modal,
@@ -11,40 +10,84 @@ import {
   ModalFooter,
   ModalHeader,
 } from "flowbite-react";
-import { adminGetJobsAPI } from "../../services/allAPIs";
+import { adminGetJobsAPI, addApplicationAPI } from "../../services/allAPIs";
 
 function Careers() {
   const [openModal, setOpenModal] = useState(false);
-  //state to get token
+  const [selectedJobTitle, setSelectedJobTitle] = useState("");
+  const [form, setForm] = useState({
+    fullName: "",
+    qualification: "",
+    email: "",
+    phone: "",
+    coverletter: "",
+    resume: null,
+  });
   const [token, setToken] = useState("");
-  //useEffect to get token
   useEffect(() => {
     setToken(sessionStorage.getItem("token"));
   }, []);
-  console.log(token);
-  //state to hold jobs
   const [jobs, setJobs] = useState([]);
-  //function to get jobs
   const getJobs = async () => {
     try {
       const reqHeader = {
         Authorization: `Bearer ${token}`,
       };
       const result = await adminGetJobsAPI(reqHeader);
-      console.log(result.data);
       setJobs(result.data);
     } catch (error) {
       console.log("Error:", error);
     }
   };
-
-  //useeffect for geting jobs
   useEffect(() => {
     if (token) {
       getJobs();
     }
   }, [token]);
-  console.log(jobs);
+
+  // Handle input changes
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+  const handleFileChange = (e) => {
+    setForm((prev) => ({ ...prev, resume: e.target.files[0] }));
+  };
+
+  // Handle Apply button click
+  const handleApplyClick = (jobTitle) => {
+    setSelectedJobTitle(jobTitle);
+    setOpenModal(true);
+  };
+
+  // Handle Submit
+  const handleSubmit = async () => {
+    const formData = new FormData();
+    formData.append("fullName", form.fullName);
+    formData.append("qualification", form.qualification);
+    formData.append("email", form.email);
+    formData.append("phone", form.phone);
+    formData.append("coverletter", form.coverletter);
+    formData.append("jobTitle", selectedJobTitle);
+    if (form.resume) formData.append("resume", form.resume);
+
+    const reqHeader = { Authorization: `Bearer ${token}` };
+    try {
+      await addApplicationAPI(formData, reqHeader);
+      setOpenModal(false);
+      setForm({
+        fullName: "",
+        qualification: "",
+        email: "",
+        phone: "",
+        coverletter: "",
+        resume: null,
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   return (
     <div>
       <Header />
@@ -61,7 +104,6 @@ function Careers() {
             vel distinctio omnis voluptates obcaecati quidem quas iure? Facere?
           </p>
         </div>
-
         {/* Search Bar */}
         <div className="mt-10 w-full max-w-4xl flex justify-center">
           <div className="flex items-center border border-gray-300 rounded-md overflow-hidden">
@@ -75,13 +117,15 @@ function Careers() {
             </button>
           </div>
         </div>
-
         {/* Current Openings */}
         <div className="w-full max-w-4xl mt-12">
           <h2 className="text-xl font-medium mb-4">Current openings</h2>
           {jobs.length > 0 ? (
             jobs.map((item) => (
-              <div className="border rounded-md p-6 shadow-md my-3 bg-white">
+              <div
+                className="border rounded-md p-6 shadow-md my-3 bg-white"
+                key={item._id}
+              >
                 <div className="flex items-start justify-between">
                   <div>
                     <h3 className="text-lg font-semibold mb-1">{item.title}</h3>
@@ -108,95 +152,11 @@ function Careers() {
                     </p>
                   </div>
                   <button
-                    onClick={() => setOpenModal(true)}
+                    onClick={() => handleApplyClick(item.title)}
                     className="bg-amber-800 hover:bg-amber-950 text-white px-4 py-2 rounded-md text-sm flex items-center"
                   >
                     Apply <BsBoxArrowUpRight className="ml-1" />
                   </button>
-                  <Modal show={openModal} onClose={() => setOpenModal(false)}>
-                    <ModalHeader className="flex items-center justify-center bg-amber-800 h-[10px]">
-                      <div className="flex justify-center items-center ">
-                        <p className="text-center text-yellow-50">
-                          Application Form
-                        </p>
-                      </div>
-                    </ModalHeader>
-                    <ModalBody>
-                      <div className="space-y-6">
-                        <div className="flex justify-center space-x-3">
-                          <input
-                            className="bg-yellow-50 min-h-10 outline-1 outline-amber-800 rounded px-2"
-                            type="text"
-                            name=""
-                            id=""
-                            placeholder="Fullname"
-                          />
-                          <input
-                            className="bg-yellow-50 min-h-10 outline-1 outline-amber-800 rounded px-2"
-                            type="text"
-                            name=""
-                            id=""
-                            placeholder="Qualification"
-                          />
-                        </div>
-                        <div className="flex justify-center space-x-3">
-                          <input
-                            className="bg-yellow-50 min-h-10 outline-1 outline-amber-800 rounded px-2"
-                            type="text"
-                            name=""
-                            id=""
-                            placeholder="Email ID"
-                          />
-                          <input
-                            className="bg-yellow-50 min-h-10 outline-1 outline-amber-800 rounded px-2"
-                            type="text"
-                            name=""
-                            id=""
-                            placeholder="Phone Number"
-                          />
-                        </div>
-                        <div className="flex justify-center">
-                          <textarea
-                            id="message"
-                            name="message"
-                            rows="4"
-                            placeholder="Cover Letter"
-                            className=" p-3 border border-gray-300 w-[28rem] rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-yellow-50 text-gray-700"
-                          />
-                        </div>
-                        <div className="flex justify-center flex-col">
-                          <label
-                            htmlFor="fileUpload"
-                            className="block mb-2 text-sm font-medium text-gray-700 mx-[4rem]"
-                          >
-                            Resume
-                          </label>
-                          <div className="flex justify-center items-center">
-                            <input
-                              type="file"
-                              id="fileUpload"
-                              name="fileUpload"
-                              className="outline-1 outline-amber-800 rounded w-[28rem] file:bg-amber-800 bg-yellow-50 text-gray-400"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </ModalBody>
-                    <ModalFooter className="flex justify-end">
-                      <Button
-                        className="bg-yellow-400"
-                        onClick={() => setOpenModal(false)}
-                      >
-                        Reset
-                      </Button>
-                      <Button
-                        className="bg-amber-800"
-                        onClick={() => setOpenModal(false)}
-                      >
-                        Submit
-                      </Button>
-                    </ModalFooter>
-                  </Modal>
                 </div>
               </div>
             ))
@@ -206,6 +166,103 @@ function Careers() {
             </div>
           )}
         </div>
+        {/* Modal outside the map */}
+        <Modal show={openModal} onClose={() => setOpenModal(false)}>
+          <ModalHeader className="flex items-center justify-center bg-amber-800 h-[10px]">
+            <div className="flex justify-center items-center ">
+              <p className="text-center text-yellow-50">Application Form</p>
+            </div>
+          </ModalHeader>
+          <ModalBody>
+            <div className="space-y-6">
+              <div className="flex justify-center space-x-3">
+                <input
+                  className="bg-yellow-50 min-h-10 outline-1 outline-amber-800 rounded px-2"
+                  type="text"
+                  name="fullName"
+                  value={form.fullName}
+                  onChange={handleChange}
+                  placeholder="Fullname"
+                />
+                <input
+                  className="bg-yellow-50 min-h-10 outline-1 outline-amber-800 rounded px-2"
+                  type="text"
+                  name="qualification"
+                  value={form.qualification}
+                  onChange={handleChange}
+                  placeholder="Qualification"
+                />
+              </div>
+              <div className="flex justify-center space-x-3">
+                <input
+                  className="bg-yellow-50 min-h-10 outline-1 outline-amber-800 rounded px-2"
+                  type="text"
+                  name="email"
+                  value={form.email}
+                  onChange={handleChange}
+                  placeholder="Email ID"
+                />
+                <input
+                  className="bg-yellow-50 min-h-10 outline-1 outline-amber-800 rounded px-2"
+                  type="text"
+                  name="phone"
+                  value={form.phone}
+                  onChange={handleChange}
+                  placeholder="Phone Number"
+                />
+              </div>
+              <div className="flex justify-center">
+                <textarea
+                  id="coverletter"
+                  name="coverletter"
+                  rows="4"
+                  value={form.coverletter}
+                  onChange={handleChange}
+                  placeholder="Cover Letter"
+                  className=" p-3 border border-gray-300 w-[28rem] rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-yellow-50 text-gray-700"
+                />
+              </div>
+              <div className="flex justify-center flex-col">
+                <label
+                  htmlFor="fileUpload"
+                  className="block mb-2 text-sm font-medium text-gray-700 mx-[4rem]"
+                >
+                  Resume
+                </label>
+                <div className="flex justify-center items-center">
+                  <input
+                    type="file"
+                    id="fileUpload"
+                    name="resume"
+                    onChange={handleFileChange}
+                    className="outline-1 outline-amber-800 rounded w-[28rem] file:bg-amber-800 bg-yellow-50 text-gray-400"
+                  />
+                </div>
+              </div>
+            </div>
+          </ModalBody>
+          <ModalFooter className="flex justify-end">
+            <Button
+              className="bg-yellow-400"
+              onClick={() => {
+                setForm({
+                  fullName: "",
+                  qualification: "",
+                  email: "",
+                  phone: "",
+                  coverletter: "",
+                  resume: null,
+                });
+                setOpenModal(false);
+              }}
+            >
+              Reset
+            </Button>
+            <Button className="bg-amber-800" onClick={handleSubmit}>
+              Submit
+            </Button>
+          </ModalFooter>
+        </Modal>
       </div>
       <Footer />
     </div>

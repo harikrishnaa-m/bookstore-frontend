@@ -85,3 +85,14 @@ export const getAdminDetailsAPI = (reqHeader) => {
 export const makePaymentAPI = (reqBody, reqHeader) => {
   return commonAPI("PUT", `${serverURL}/api/make-payment`, reqBody, reqHeader);
 };
+export const addApplicationAPI = (reqBody, reqHeader) => {
+  return commonAPI(
+    "POST",
+    `${serverURL}/api/addApplication`,
+    reqBody,
+    reqHeader
+  );
+};
+export const getApplicantsAPI = (reqHeader) => {
+  return commonAPI("GET", `${serverURL}/api/getApplicants`, null, reqHeader);
+};

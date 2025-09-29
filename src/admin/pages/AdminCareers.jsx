@@ -15,10 +15,14 @@ import {
   adminAddJobAPI,
   adminDeleteJobAPI,
   adminGetJobsAPI,
+  getApplicantsAPI,
 } from "../../services/allAPIs";
 
 import { useEffect } from "react";
+
 function AdminCareers() {
+  // State for applicants
+  const [applicants, setApplicants] = useState([]);
   //state to get token
   const [token, setToken] = useState("");
   //useEffect to get token
@@ -139,6 +143,21 @@ function AdminCareers() {
     setToggle(false);
   };
   console.log(toggle);
+  // Fetch applicants when toggle is false (View Applicants tab)
+  useEffect(() => {
+    const fetchApplicants = async () => {
+      if (!toggle && token) {
+        try {
+          const reqHeader = { Authorization: `Bearer ${token}` };
+          const result = await getApplicantsAPI(reqHeader);
+          setApplicants(result.data);
+        } catch (error) {
+          console.log("Error fetching applicants:", error);
+        }
+      }
+    };
+    fetchApplicants();
+  }, [toggle, token]);
   return (
     <div>
       <AdminHeader />
@@ -448,32 +467,49 @@ function AdminCareers() {
                       </tr>
                     </thead>
                     <tbody>
-                      <tr>
-                        <td className="border-2 border-gray-400 px-4 py-2">
-                          1
-                        </td>
-                        <td className="border-2 border-gray-400 px-4 py-2">
-                          Developer
-                        </td>
-                        <td className="border-2 border-gray-400 px-4 py-2">
-                          Juan Mata
-                        </td>
-                        <td className="border-2 border-gray-400 px-4 py-2">
-                          BSc CS
-                        </td>
-                        <td className="border-2 border-gray-400 px-4 py-2">
-                          juan@example.com
-                        </td>
-                        <td className="border-2 border-gray-400 px-4 py-2">
-                          1234567890
-                        </td>
-                        <td className="border-2 border-gray-400 px-4 py-2 hover:underline hover:text-blue-600 cursor-pointer">
-                          View
-                        </td>
-                        <td className="border-2 border-gray-400 px-4 py-2 hover:underline hover:text-blue-600 cursor-pointer">
-                          Download
-                        </td>
-                      </tr>
+                      {applicants.length > 0 ? (
+                        applicants.map((applicant, idx) => (
+                          <tr key={applicant._id}>
+                            <td className="border-2 border-gray-400 px-4 py-2">
+                              {idx + 1}
+                            </td>
+                            <td className="border-2 border-gray-400 px-4 py-2">
+                              {applicant.jobTitle}
+                            </td>
+                            <td className="border-2 border-gray-400 px-4 py-2">
+                              {applicant.fullName}
+                            </td>
+                            <td className="border-2 border-gray-400 px-4 py-2">
+                              {applicant.qualification}
+                            </td>
+                            <td className="border-2 border-gray-400 px-4 py-2">
+                              {applicant.email}
+                            </td>
+                            <td className="border-2 border-gray-400 px-4 py-2">
+                              {applicant.phone}
+                            </td>
+                            <td className="border-2 border-gray-400 px-4 py-2 hover:underline hover:text-blue-600 cursor-pointer">
+                              {applicant.coverletter}
+                            </td>
+                            <td className="border-2 border-gray-400 px-4 py-2 hover:underline hover:text-blue-600 cursor-pointer">
+                              <a
+                                href={`/uploads/${applicant.resume}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                download
+                              >
+                                Download
+                              </a>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan={8} className="text-center py-4">
+                            No applicants found
+                          </td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 </div>
